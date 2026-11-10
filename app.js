@@ -75,7 +75,7 @@
 
   // file picking
   function refreshGo() {
-    $("#go").disabled = state.busy || !(state.file || $("#videoUrl").value.trim());
+    $("#go").disabled = state.busy;
   }
   function setFile(f) {
     if (!f) return;
@@ -199,7 +199,11 @@
   // upload
   $("#go").onclick = function () {
     var link = $("#videoUrl").value.trim();
-    if ((!state.file && !link) || state.busy) return;
+    if (state.busy) return;
+    if (!state.file && !link) {
+      showProgress("Nothing to clip", 0, "Paste a video link or choose a file first.", true);
+      return;
+    }
     state.busy = true;
     this.disabled = true;
     $("#clips").innerHTML = "";

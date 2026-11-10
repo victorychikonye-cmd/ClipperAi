@@ -31,6 +31,7 @@ ACCESS_KEY = os.getenv("ACCESS_KEY", "")  # optional: require this key from the 
 MAX_CLIPS = int(os.getenv("MAX_CLIPS", "20"))
 MAX_VIDEO_MINUTES = int(os.getenv("MAX_VIDEO_MINUTES", "180"))  # for pasted links
 
+NOCACHE = {"Cache-Control": "no-store"}
 LENGTHS = {"short": (20, 40), "medium": (30, 60), "long": (60, 90)}
 
 app = FastAPI(title="ClipAI")
@@ -378,9 +379,9 @@ app.mount("/files", StaticFiles(directory=str(DATA)), name="files")
 
 @app.get("/")
 def index():
-    return FileResponse(BASE / "index.html")
+    return FileResponse(BASE / "index.html", headers=NOCACHE)
 
 
 @app.get("/app.js")
 def appjs():
-    return FileResponse(BASE / "app.js", media_type="application/javascript")
+    return FileResponse(BASE / "app.js", media_type="application/javascript", headers=NOCACHE)
