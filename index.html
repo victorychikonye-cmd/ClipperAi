@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0e0f13">
+<title>ClipAI</title>
+<style>
+  :root{
+    --bg:#0e0f13; --card:#171922; --line:#262a37; --text:#f2f3f7; --muted:#9aa0b4;
+    --accent:#ff6b4a; --accent2:#ffb44a; --ok:#3ddc97; --bad:#ff5d6c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);
+    font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:20px 16px 60px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+  .logo{font-weight:800;font-size:22px;letter-spacing:-.5px}
+  .logo span{background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .gear{background:none;border:1px solid var(--line);color:var(--muted);border-radius:10px;
+    padding:8px 12px;font-size:14px;cursor:pointer}
+  h1{font-size:30px;line-height:1.15;margin:0 0 8px;letter-spacing:-.8px}
+  .sub{color:var(--muted);margin:0 0 22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px}
+  .drop{display:block;border:2px dashed var(--line);border-radius:14px;padding:30px 14px;
+    text-align:center;cursor:pointer;transition:.15s}
+  .drop.over,.drop:hover{border-color:var(--accent);background:#1b1d28}
+  .drop b{display:block;font-size:17px;margin-bottom:4px}
+  .drop small{color:var(--muted)}
+  .drop input{display:none}
+  .fname{margin-top:10px;color:var(--accent2);word-break:break-all;font-size:14px}
+  label.f{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:transparent;color:var(--text);
+    padding:9px 14px;border-radius:999px;font-size:14px;cursor:pointer}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .row{display:flex;align-items:center;justify-content:space-between;margin-top:16px}
+  .switch{position:relative;width:46px;height:26px;background:var(--line);border-radius:99px;
+    border:0;cursor:pointer;transition:.15s}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;
+    border-radius:50%;background:#fff;transition:.15s}
+  .switch.on{background:var(--accent)}
+  .switch.on::after{left:23px}
+  .go{width:100%;margin-top:18px;padding:15px;border:0;border-radius:14px;font-size:17px;
+    font-weight:700;color:#fff;cursor:pointer;
+    background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .go:disabled{opacity:.45;cursor:not-allowed}
+  input[type=text],input[type=password]{width:100%;padding:12px;border-radius:10px;
+    border:1px solid var(--line);background:#0e0f13;color:var(--text);font-size:15px}
+  .hidden{display:none}
+  .bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:12px 0 8px}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));
+    transition:width .4s}
+  .msg{color:var(--muted);font-size:14px}
+  .err{color:var(--bad)}
+  .clips{display:grid;gap:16px}
+  .clip video{width:100%;max-height:70vh;background:#000;border-radius:12px;display:block}
+  .clip h3{margin:12px 0 2px;font-size:17px}
+  .clip p{margin:0 0 10px;color:var(--muted);font-size:14px}
+  .clip .meta{display:flex;gap:10px;align-items:center;justify-content:space-between}
+  .dl{display:inline-block;background:var(--ok);color:#06251a;font-weight:700;text-decoration:none;
+    padding:9px 16px;border-radius:10px;font-size:14px}
+  .tag{font-size:12px;color:var(--muted)}
+  footer{margin-top:30px;text-align:center;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">Clip<span>AI</span></div>
+    <button class="gear" id="gearBtn" type="button">Settings</button>
+  </header>
+
+  <h1>Turn long videos into viral clips</h1>
+  <p class="sub">Upload a podcast, stream, sermon or lecture. AI finds the best moments and gives you vertical clips with captions.</p>
+
+  <div class="card hidden" id="settings">
+    <label class="f" for="apiUrl">Server address (leave empty if this site is the server)</label>
+    <input type="text" id="apiUrl" placeholder="https://your-server.example.com" autocapitalize="off" autocomplete="off">
+    <label class="f" for="accessKey">Access key (only if the server needs one)</label>
+    <input type="password" id="accessKey" autocomplete="off">
+    <button class="chip on" id="saveSettings" type="button" style="margin-top:14px">Save</button>
+  </div>
+
+  <div class="card" id="uploadCard">
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept="video/*,audio/*">
+      <b>Tap to choose a video</b>
+      <small>or drag and drop. MP4, MOV, MKV, WebM, MP3.</small>
+      <div class="fname" id="fname"></div>
+    </label>
+
+    <label class="f">Number of clips</label>
+    <div class="chips" id="countChips">
+      <button type="button" class="chip" data-v="3">3</button>
+      <button type="button" class="chip on" data-v="5">5</button>
+      <button type="button" class="chip" data-v="8">8</button>
+    </div>
+
+    <label class="f">Clip length</label>
+    <div class="chips" id="lenChips">
+      <button type="button" class="chip" data-v="short">20-40s</button>
+      <button type="button" class="chip on" data-v="medium">30-60s</button>
+      <button type="button" class="chip" data-v="long">60-90s</button>
+    </div>
+
+    <div class="row">
+      <span>Burn in captions</span>
+      <button type="button" class="switch on" id="capSwitch" aria-label="Captions"></button>
+    </div>
+
+    <button class="go" id="go" type="button" disabled>Generate clips</button>
+  </div>
+
+  <div class="card hidden" id="progressCard">
+    <b id="stage">Working...</b>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="msg" id="pmsg"></div>
+  </div>
+
+  <div class="clips" id="clips"></div>
+
+  <footer>Only upload videos you own or have permission to use.</footer>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
