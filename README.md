@@ -1,6 +1,6 @@
 # ClipAI
 
-Upload a long video, get short vertical clips with captions.
+Paste a video link (or upload a file), get short vertical clips with captions.
 
 Files (keep them all in one folder):
 - `main.py` backend and website server
@@ -19,6 +19,8 @@ Files (keep them all in one folder):
    - `ACCESS_KEY` = any password you choose (recommended, so strangers can't spend your credits)
    - `WHISPER_MODEL` = `base` (use `small` for better accuracy, slower)
    - `MAX_UPLOAD_MB` = `500`
+   - `MAX_CLIPS` = `20` (most clips one job can make)
+   - `MAX_VIDEO_MINUTES` = `180` (longest video accepted from a link)
 4. Open the service URL. The website and the server are the same address.
 5. Tap Settings on the website, type your ACCESS_KEY, and save.
 
@@ -29,6 +31,11 @@ export ANTHROPIC_API_KEY=your-key
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 Needs FFmpeg installed. Open http://localhost:8000
+
+## Pasting links
+Links are downloaded with yt-dlp (YouTube and most video sites). Public videos only.
+YouTube often blocks downloads from cloud servers ("confirm you're not a bot"). If that happens, upload the file instead, or set `YTDLP_COOKIES_FILE` to a cookies.txt path on the server.
+Keep yt-dlp updated (`pip install -U yt-dlp`) because sites change often.
 
 ## Notes
 - Transcription is the slow step: roughly real-time on a small CPU server, so a 1 hour video can take about an hour on `base`.

@@ -49,6 +49,8 @@
   input[type=text],input[type=password]{width:100%;padding:12px;border-radius:10px;
     border:1px solid var(--line);background:#0e0f13;color:var(--text);font-size:15px}
   .hidden{display:none}
+  .or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:14px 0}
+  .or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
   .bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:12px 0 8px}
   .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));
     transition:width .4s}
@@ -84,19 +86,27 @@
   </div>
 
   <div class="card" id="uploadCard">
+    <label class="f" for="videoUrl" style="margin-top:0">Paste a video link</label>
+    <input type="text" id="videoUrl" inputmode="url" placeholder="https://youtube.com/watch?v=..." autocapitalize="off" autocomplete="off" spellcheck="false">
+
+    <div class="or"><span>or upload a file</span></div>
+
     <label class="drop" id="drop">
       <input type="file" id="file" accept="video/*,audio/*">
       <b>Tap to choose a video</b>
-      <small>or drag and drop. MP4, MOV, MKV, WebM, MP3.</small>
+      <small>MP4, MOV, MKV, WebM, MP3.</small>
       <div class="fname" id="fname"></div>
     </label>
 
     <label class="f">Number of clips</label>
     <div class="chips" id="countChips">
-      <button type="button" class="chip" data-v="3">3</button>
-      <button type="button" class="chip on" data-v="5">5</button>
-      <button type="button" class="chip" data-v="8">8</button>
+      <button type="button" class="chip" data-v="5">5</button>
+      <button type="button" class="chip on" data-v="8">8</button>
+      <button type="button" class="chip" data-v="12">12</button>
+      <button type="button" class="chip" data-v="15">15</button>
+      <button type="button" class="chip" data-v="20">20</button>
     </div>
+    <div class="msg" style="margin-top:6px">Short videos may give fewer clips if there are not enough good moments.</div>
 
     <label class="f">Clip length</label>
     <div class="chips" id="lenChips">

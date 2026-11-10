@@ -9,7 +9,7 @@
     return "";
   }
 
-  var state = { file: null, count: "5", length: "medium", captions: true, busy: false };
+  var state = { file: null, count: "8", length: "medium", captions: true, busy: false };
   var apiBase = store("clipai_api");
   var accessKey = store("clipai_key");
 
@@ -48,12 +48,24 @@
   };
 
   // file picking
+  function refreshGo() {
+    $("#go").disabled = state.busy || !(state.file || $("#videoUrl").value.trim());
+  }
   function setFile(f) {
     if (!f) return;
     state.file = f;
+    $("#videoUrl").value = "";
     $("#fname").textContent = f.name + " (" + (f.size / 1048576).toFixed(1) + " MB)";
-    $("#go").disabled = state.busy;
+    refreshGo();
   }
+  $("#videoUrl").addEventListener("input", function () {
+    if (this.value.trim()) {
+      state.file = null;
+      $("#file").value = "";
+      $("#fname").textContent = "";
+    }
+    refreshGo();
+  });
   $("#file").onchange = function () { setFile(this.files[0]); };
   var drop = $("#drop");
   ["dragenter", "dragover"].forEach(function (ev) {
@@ -124,6 +136,7 @@
 
   var STAGES = {
     queued: "Queued",
+    downloading: "Downloading your video",
     transcribing: "Listening to your video",
     finding: "Finding the best moments",
     cutting: "Creating clips",
@@ -144,7 +157,7 @@
           }
           if (j.stage === "done" || j.stage === "error") {
             state.busy = false;
-            $("#go").disabled = !state.file;
+            refreshGo();
             return;
           }
           setTimeout(tick, 2500);
@@ -159,13 +172,15 @@
 
   // upload
   $("#go").onclick = function () {
-    if (!state.file || state.busy) return;
+    var link = $("#videoUrl").value.trim();
+    if ((!state.file && !link) || state.busy) return;
     state.busy = true;
     this.disabled = true;
     $("#clips").innerHTML = "";
 
     var fd = new FormData();
-    fd.append("file", state.file);
+    if (link) fd.append("url", link);
+    else fd.append("file", state.file);
     fd.append("clips", state.count);
     fd.append("length", state.length);
     fd.append("captions", state.captions ? "true" : "false");
@@ -187,16 +202,16 @@
         poll(data.job_id);
       } else {
         state.busy = false;
-        $("#go").disabled = false;
-        showProgress("Upload failed", 0, data.detail || ("Server error " + xhr.status), true);
+        refreshGo();
+        showProgress("Could not start", 0, data.detail || ("Server error " + xhr.status), true);
       }
     };
     xhr.onerror = function () {
       state.busy = false;
-      $("#go").disabled = false;
+      refreshGo();
       showProgress("Upload failed", 0, "Could not reach the server. Check the server address in Settings.", true);
     };
-    showProgress("Uploading", 0, "Starting upload...");
+    showProgress(link ? "Starting" : "Uploading", 0, link ? "Sending your link..." : "Starting upload...");
     xhr.send(fd);
   };
 })();
