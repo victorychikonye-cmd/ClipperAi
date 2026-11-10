@@ -369,7 +369,7 @@ def get_job(job_id: str):
 
 @app.get("/api/health")
 def health():
-    return {"ok": True}
+    return {"ok": True, "ai_key": bool(os.getenv("ANTHROPIC_API_KEY"))}
 
 
 # clips are served from /files/<job_id>/clip_N.mp4

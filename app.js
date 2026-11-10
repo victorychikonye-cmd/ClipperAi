@@ -18,6 +18,31 @@
 
   function base() { return apiBase.replace(/\/+$/, ""); }
 
+  // server status
+  function checkServer() {
+    var el = $("#srvStatus");
+    el.className = "srv";
+    el.textContent = "Checking server...";
+    fetch(base() + "/api/health")
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.ok) throw new Error("bad");
+        if (j.ai_key === false) {
+          el.className = "srv bad";
+          el.textContent = "Server is running but ANTHROPIC_API_KEY is not set on it.";
+        } else {
+          el.className = "srv ok";
+          el.textContent = "Server connected";
+        }
+      })
+      .catch(function () {
+        el.className = "srv bad";
+        el.textContent = "Cannot reach the ClipAI server. This page must be opened from the server's own address " +
+          "(not from a file or GitHub Pages), or put the server address in Settings.";
+      });
+  }
+  checkServer();
+
   // settings
   $("#gearBtn").onclick = function () { $("#settings").classList.toggle("hidden"); };
   $("#saveSettings").onclick = function () {
@@ -26,6 +51,7 @@
     store("clipai_api", apiBase);
     store("clipai_key", accessKey);
     $("#settings").classList.add("hidden");
+    checkServer();
   };
 
   // chips
